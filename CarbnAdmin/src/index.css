@@ -1,0 +1,140 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@layer base {
+  :root {
+    /* CARBN – Slate & Steel with electric green accent */
+    --background: 220 18% 97%;
+    --foreground: 220 25% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 25% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 25% 10%;
+
+    --primary: 158 64% 38%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 14% 93%;
+    --secondary-foreground: 220 25% 25%;
+
+    --muted: 220 14% 93%;
+    --muted-foreground: 220 10% 50%;
+
+    --accent: 158 64% 38%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 88%;
+    --input: 220 13% 88%;
+    --ring: 158 64% 38%;
+
+    --radius: 0.5rem;
+
+    /* Status colors */
+    --status-pending: 38 92% 50%;
+    --status-pending-bg: 38 92% 96%;
+    --status-approved: 158 64% 38%;
+    --status-approved-bg: 158 64% 95%;
+    --status-invited: 211 90% 55%;
+    --status-invited-bg: 211 90% 95%;
+    --status-active: 142 71% 45%;
+    --status-active-bg: 142 71% 95%;
+    --status-declined: 0 72% 51%;
+    --status-declined-bg: 0 72% 96%;
+    --status-suspended: 32 95% 44%;
+    --status-suspended-bg: 32 95% 95%;
+    --status-completed: 270 60% 55%;
+    --status-completed-bg: 270 60% 96%;
+
+    /* Sidebar */
+    --sidebar-background: 220 25% 10%;
+    --sidebar-foreground: 220 15% 75%;
+    --sidebar-primary: 158 64% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 20% 18%;
+    --sidebar-accent-foreground: 220 15% 90%;
+    --sidebar-border: 220 20% 16%;
+    --sidebar-ring: 158 64% 38%;
+  }
+
+  .dark {
+    --background: 220 25% 8%;
+    --foreground: 220 15% 90%;
+
+    --card: 220 22% 12%;
+    --card-foreground: 220 15% 90%;
+
+    --popover: 220 22% 12%;
+    --popover-foreground: 220 15% 90%;
+
+    --primary: 158 64% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 20% 18%;
+    --secondary-foreground: 220 15% 85%;
+
+    --muted: 220 20% 18%;
+    --muted-foreground: 220 10% 55%;
+
+    --accent: 158 64% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 65% 48%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 20% 20%;
+    --input: 220 20% 20%;
+    --ring: 158 64% 45%;
+
+    --sidebar-background: 220 28% 6%;
+    --sidebar-foreground: 220 15% 68%;
+    --sidebar-primary: 158 64% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 22% 14%;
+    --sidebar-accent-foreground: 220 15% 88%;
+    --sidebar-border: 220 22% 13%;
+    --sidebar-ring: 158 64% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  code, kbd, pre {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 9999px;
+  }
+}
