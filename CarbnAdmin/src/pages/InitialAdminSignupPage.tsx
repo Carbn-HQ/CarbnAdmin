@@ -99,7 +99,7 @@ export default function InitialAdminSignupPage() {
             <div>
               <label className="block text-xs font-medium text-[hsl(var(--foreground))] mb-1.5">Password</label>
               <div className="relative">
-                <input {...register("password")} type={showPassword ? "text" : "password"} placeholder="Min. 8 characters" className={inputClass + " pr-10"} />
+                <input {...register("password")} type={showPassword ? "text" : "password"} placeholder="Min. 12 characters" className={inputClass + " pr-10"} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]">
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
