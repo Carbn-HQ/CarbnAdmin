@@ -112,8 +112,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <p className="text-white text-sm font-medium truncate">
                 {admin ? `${admin.first_name} ${admin.last_name}` : "Admin"}
               </p>
-              <p className="text-[hsl(var(--sidebar-foreground))] text-xs opacity-70 truncate capitalize">
-                {admin?.role?.replace("_", " ") ?? ""}
+              <p className="text-[hsl(var(--sidebar-foreground))] text-xs opacity-70 truncate">
+                {admin?.email ?? ""}
               </p>
             </div>
           </div>

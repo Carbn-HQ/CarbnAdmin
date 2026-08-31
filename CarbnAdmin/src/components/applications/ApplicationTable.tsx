@@ -1,9 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import { ChevronRight, ChevronUp, ChevronDown, ExternalLink } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import ApplicationStatusBadge from "./ApplicationStatusBadge";
 import { formatDate } from "../../utils/formatDate";
 import type { BetaApplication } from "../../types/application";
-import { cn } from "../../lib/utils";
 
 interface ApplicationTableProps {
   applications: BetaApplication[];
@@ -13,9 +12,7 @@ interface ApplicationTableProps {
 
 const columns = [
   { key: "email", label: "Applicant" },
-  { key: "beta_status", label: "Beta Status" },
-  { key: "registration_status", label: "Registration" },
-  { key: "source", label: "Source" },
+  { key: "status", label: "Status" },
   { key: "created_at", label: "Applied" },
 ];
 
@@ -96,18 +93,7 @@ export default function ApplicationTable({
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <ApplicationStatusBadge type="beta" status={app.beta_status} />
-                </td>
-                <td className="px-4 py-3">
-                  <ApplicationStatusBadge type="registration" status={app.registration_status} />
-                </td>
-                <td className="px-4 py-3">
-                  <span className="text-[hsl(var(--muted-foreground))]">
-                    {app.source ?? "–"}
-                    {app.campaign && (
-                      <span className="ml-1 text-xs opacity-70">/ {app.campaign}</span>
-                    )}
-                  </span>
+                  <ApplicationStatusBadge status={app.status} />
                 </td>
                 <td className="px-4 py-3 text-[hsl(var(--muted-foreground))] whitespace-nowrap text-xs">
                   {formatDate(app.created_at)}

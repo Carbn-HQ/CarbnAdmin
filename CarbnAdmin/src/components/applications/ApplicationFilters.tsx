@@ -1,65 +1,36 @@
 import { Search, Filter, X, ChevronDown } from "lucide-react";
-import type { ApplicationFilters, BetaStatus, RegistrationStatus } from "../../types/application";
+import type { ApplicantStatus } from "../../types/application";
 
-const betaStatusOptions: { value: BetaStatus | ""; label: string }[] = [
+const statusOptions: { value: ApplicantStatus | ""; label: string }[] = [
   { value: "", label: "All Statuses" },
-  { value: "pending_review", label: "Pending Review" },
+  { value: "pending", label: "Pending" },
   { value: "approved", label: "Approved" },
-  { value: "invited", label: "Invited" },
   { value: "active", label: "Active" },
   { value: "declined", label: "Declined" },
-  { value: "suspended", label: "Suspended" },
-  { value: "completed", label: "Completed" },
-];
-
-const regStatusOptions: { value: RegistrationStatus | ""; label: string }[] = [
-  { value: "", label: "All Registration" },
-  { value: "email_pending", label: "Email Pending" },
-  { value: "email_verified", label: "Email Verified" },
-  { value: "registration_complete", label: "Registered" },
-];
-
-const sortOptions = [
-  { value: "created_at", label: "Date Applied" },
-  { value: "updated_at", label: "Last Updated" },
-  { value: "email", label: "Email" },
 ];
 
 interface ApplicationFiltersProps {
   search: string;
-  betaStatus: BetaStatus | "";
-  registrationStatus: RegistrationStatus | "";
-  sort: string;
-  order: "asc" | "desc";
+  status: ApplicantStatus | "";
   onSearchChange: (v: string) => void;
-  onBetaStatusChange: (v: BetaStatus | "") => void;
-  onRegistrationStatusChange: (v: RegistrationStatus | "") => void;
-  onSortChange: (v: string) => void;
-  onOrderChange: (v: "asc" | "desc") => void;
+  onStatusChange: (v: ApplicantStatus | "") => void;
   onReset: () => void;
   total: number;
 }
 
 export default function ApplicationFilters({
   search,
-  betaStatus,
-  registrationStatus,
-  sort,
-  order,
+  status,
   onSearchChange,
-  onBetaStatusChange,
-  onRegistrationStatusChange,
-  onSortChange,
-  onOrderChange,
+  onStatusChange,
   onReset,
   total,
 }: ApplicationFiltersProps) {
-  const hasFilters = search || betaStatus || registrationStatus;
+  const hasFilters = Boolean(search || status);
 
   return (
     <div className="space-y-3">
       <div className="flex flex-col sm:flex-row gap-3">
-        {/* Search */}
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--muted-foreground))]" />
           <input
@@ -79,58 +50,19 @@ export default function ApplicationFilters({
           )}
         </div>
 
-        {/* Beta status */}
         <div className="relative">
           <select
-            value={betaStatus}
-            onChange={(e) => onBetaStatusChange(e.target.value as BetaStatus | "")}
+            value={status}
+            onChange={(e) => onStatusChange(e.target.value as ApplicantStatus | "")}
             className="appearance-none pl-3 pr-8 py-2 text-sm border border-[hsl(var(--border))] rounded-lg bg-[hsl(var(--card))] text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] cursor-pointer"
           >
-            {betaStatusOptions.map((o) => (
+            {statusOptions.map((o) => (
               <option key={o.value} value={o.value}>{o.label}</option>
             ))}
           </select>
           <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--muted-foreground))] pointer-events-none" />
         </div>
 
-        {/* Registration status */}
-        <div className="relative">
-          <select
-            value={registrationStatus}
-            onChange={(e) => onRegistrationStatusChange(e.target.value as RegistrationStatus | "")}
-            className="appearance-none pl-3 pr-8 py-2 text-sm border border-[hsl(var(--border))] rounded-lg bg-[hsl(var(--card))] text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] cursor-pointer"
-          >
-            {regStatusOptions.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
-          </select>
-          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--muted-foreground))] pointer-events-none" />
-        </div>
-
-        {/* Sort */}
-        <div className="relative">
-          <select
-            value={sort}
-            onChange={(e) => onSortChange(e.target.value)}
-            className="appearance-none pl-3 pr-8 py-2 text-sm border border-[hsl(var(--border))] rounded-lg bg-[hsl(var(--card))] text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] cursor-pointer"
-          >
-            {sortOptions.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
-          </select>
-          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--muted-foreground))] pointer-events-none" />
-        </div>
-
-        {/* Order toggle */}
-        <button
-          onClick={() => onOrderChange(order === "asc" ? "desc" : "asc")}
-          className="px-3 py-2 text-sm border border-[hsl(var(--border))] rounded-lg bg-[hsl(var(--card))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))] transition-colors"
-          title="Toggle sort order"
-        >
-          {order === "asc" ? "↑ Asc" : "↓ Desc"}
-        </button>
-
-        {/* Reset */}
         {hasFilters && (
           <button
             onClick={onReset}

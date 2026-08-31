@@ -11,7 +11,7 @@ const schema = z.object({
   first_name: z.string().min(1, "First name required"),
   last_name: z.string().min(1, "Last name required"),
   email: z.string().email("Valid email required"),
-  password: z.string().min(8, "Minimum 8 characters"),
+  password: z.string().min(12, "Minimum 12 characters"),
   bootstrap_secret: z.string().min(1, "Bootstrap secret required"),
 });
 

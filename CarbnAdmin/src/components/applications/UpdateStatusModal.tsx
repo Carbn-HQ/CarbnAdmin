@@ -1,24 +1,12 @@
 import { useState } from "react";
-import { X, AlertTriangle, CheckCircle, ChevronDown } from "lucide-react";
+import { X, AlertTriangle, CheckCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { updateBetaApplicationStatus } from "../../api/betaApplicationsApi";
+import { declineBetaApplication } from "../../api/betaApplicationsApi";
 import { getApiErrorMessage } from "../../utils/apiError";
-import type { BetaStatus } from "../../types/application";
-
-const statusOptions: { value: BetaStatus; label: string }[] = [
-  { value: "pending_review", label: "Pending Review" },
-  { value: "approved", label: "Approved" },
-  { value: "invited", label: "Invited" },
-  { value: "active", label: "Active" },
-  { value: "declined", label: "Declined" },
-  { value: "suspended", label: "Suspended" },
-  { value: "completed", label: "Completed" },
-];
 
 const schema = z.object({
-  betaStatus: z.enum(["pending_review", "approved", "invited", "active", "declined", "suspended", "completed"]),
   reviewNotes: z.string().optional(),
 });
 
@@ -26,7 +14,6 @@ type FormValues = z.infer<typeof schema>;
 
 interface UpdateStatusModalProps {
   applicationId: string;
-  currentStatus: BetaStatus;
   applicantName: string;
   onClose: () => void;
   onSuccess: () => void;
@@ -34,7 +21,6 @@ interface UpdateStatusModalProps {
 
 export default function UpdateStatusModal({
   applicationId,
-  currentStatus,
   applicantName,
   onClose,
   onSuccess,
@@ -43,9 +29,8 @@ export default function UpdateStatusModal({
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
+  const { register, handleSubmit } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { betaStatus: currentStatus },
   });
 
   const onSubmit = async (data: FormValues) => {
@@ -53,9 +38,8 @@ export default function UpdateStatusModal({
     setError(null);
 
     try {
-      const response = await updateBetaApplicationStatus({
+      const response = await declineBetaApplication({
         applicationId,
-        betaStatus: data.betaStatus,
         reviewNotes: data.reviewNotes,
       });
 
@@ -63,9 +47,9 @@ export default function UpdateStatusModal({
       setTimeout(() => {
         onSuccess();
         onClose();
-      }, 1500);
+      }, 1200);
     } catch (err) {
-      setError(getApiErrorMessage(err, "Could not update status."));
+      setError(getApiErrorMessage(err, "Could not decline the application."));
     } finally {
       setIsLoading(false);
     }
@@ -75,7 +59,7 @@ export default function UpdateStatusModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="bg-[hsl(var(--card))] rounded-xl shadow-2xl w-full max-w-md border border-[hsl(var(--border))]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-[hsl(var(--border))]">
-          <h2 className="text-base font-semibold text-[hsl(var(--foreground))]">Update Status</h2>
+          <h2 className="text-base font-semibold text-[hsl(var(--foreground))]">Decline Application</h2>
           <button onClick={onClose} className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]">
             <X className="w-5 h-5" />
           </button>
@@ -83,23 +67,8 @@ export default function UpdateStatusModal({
 
         <form onSubmit={handleSubmit(onSubmit)} className="px-6 py-5 space-y-4">
           <p className="text-sm text-[hsl(var(--muted-foreground))]">
-            Update beta status for <span className="font-medium text-[hsl(var(--foreground))]">{applicantName}</span>.
+            Decline <span className="font-medium text-[hsl(var(--foreground))]">{applicantName}</span>. They will receive an update email.
           </p>
-
-          <div>
-            <label className="block text-xs font-medium text-[hsl(var(--foreground))] mb-1.5">New Status</label>
-            <div className="relative">
-              <select
-                {...register("betaStatus")}
-                className="w-full appearance-none pl-3 pr-8 py-2 text-sm border border-[hsl(var(--border))] rounded-lg bg-[hsl(var(--background))] text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] cursor-pointer"
-              >
-                {statusOptions.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--muted-foreground))] pointer-events-none" />
-            </div>
-          </div>
 
           <div>
             <label className="block text-xs font-medium text-[hsl(var(--foreground))] mb-1.5">
@@ -108,7 +77,7 @@ export default function UpdateStatusModal({
             <textarea
               {...register("reviewNotes")}
               rows={3}
-              placeholder="Reason for this status change…"
+              placeholder="Internal reason for declining…"
               className="w-full px-3 py-2 text-sm border border-[hsl(var(--border))] rounded-lg bg-[hsl(var(--background))] text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--muted-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] resize-none"
             />
           </div>
@@ -139,9 +108,9 @@ export default function UpdateStatusModal({
             <button
               type="submit"
               disabled={isLoading || !!successMsg}
-              className="flex-1 px-4 py-2 text-sm font-medium bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
+              className="flex-1 px-4 py-2 text-sm font-medium bg-[hsl(var(--status-declined))] text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
             >
-              {isLoading ? "Saving…" : "Update Status"}
+              {isLoading ? "Declining…" : "Decline"}
             </button>
           </div>
         </form>
