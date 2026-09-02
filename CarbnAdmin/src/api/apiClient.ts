@@ -2,7 +2,7 @@ import axios from "axios";
 import { clearAdminSession, getAdminAccessToken } from "../utils/tokenStorage";
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: import.meta.env.VITE_API_BASE_URL || "https://carbnbackend.onrender.com/api/v1",
   headers: {
     "Content-Type": "application/json",
   },
