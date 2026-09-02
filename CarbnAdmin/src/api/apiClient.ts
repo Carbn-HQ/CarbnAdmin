@@ -1,8 +1,10 @@
 import axios from "axios";
 import { clearAdminSession, getAdminAccessToken } from "../utils/tokenStorage";
 
+export const API_BASE_URL = "https://carbnbackend.onrender.com/api/v1";
+
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "https://carbnbackend.onrender.com/api/v1",
+  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -11,6 +13,7 @@ const apiClient = axios.create({
 
 apiClient.interceptors.request.use(
   (config) => {
+    config.baseURL = API_BASE_URL;
     const token = getAdminAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
