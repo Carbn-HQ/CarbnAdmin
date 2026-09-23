@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
   Users,
@@ -8,13 +8,16 @@ import {
   X,
   ChevronRight,
   Leaf,
+  LifeBuoy,
 } from "lucide-react";
 import { useAdminAuth } from "../../hooks/useAdminAuth";
+import { getSupportUnreadCount } from "../../api/supportApi";
 import { cn } from "../../lib/utils";
 
 const navItems = [
   { to: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/admin/applications", icon: Users, label: "Applications" },
+  { to: "/admin/support", icon: LifeBuoy, label: "Support" },
 ];
 
 interface AdminLayoutProps {
@@ -26,6 +29,36 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [unreadSupport, setUnreadSupport] = useState(0);
+
+  useEffect(() => {
+    const loadCount = async () => {
+      try {
+        const response = await getSupportUnreadCount();
+        setUnreadSupport(response.data?.unread || 0);
+      } catch {
+        setUnreadSupport(0);
+      }
+    };
+
+    void loadCount();
+    const timer = window.setInterval(() => {
+      void loadCount();
+    }, 20000);
+
+    const onUnread = (event: Event) => {
+      const unread = Number((event as CustomEvent<number>).detail);
+      if (Number.isFinite(unread)) {
+        setUnreadSupport(unread);
+      }
+    };
+
+    window.addEventListener("carbn-support-unread", onUnread);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("carbn-support-unread", onUnread);
+    };
+  }, []);
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -95,6 +128,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <>
                   <Icon className="w-4 h-4 flex-shrink-0" />
                   <span className="flex-1">{label}</span>
+                  {label === "Support" && unreadSupport > 0 ? (
+                    <span className="min-w-5 h-5 px-1.5 rounded-full bg-white/20 text-[10px] font-bold flex items-center justify-center">
+                      {unreadSupport}
+                    </span>
+                  ) : null}
                   {isActive && <ChevronRight className="w-3 h-3" />}
                 </>
               )}

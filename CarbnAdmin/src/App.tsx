@@ -11,6 +11,7 @@ import InitialAdminSignupPage from "./pages/InitialAdminSignupPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import ApplicationsPage from "./pages/ApplicationsPage";
 import ApplicationDetailsPage from "./pages/ApplicationDetailsPage";
+import SupportPage from "./pages/SupportPage";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
               <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
               <Route path="/admin/applications" element={<ApplicationsPage />} />
               <Route path="/admin/applications/:id" element={<ApplicationDetailsPage />} />
+              <Route path="/admin/support" element={<SupportPage />} />
             </Route>
 
             <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
