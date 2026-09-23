@@ -11,7 +11,9 @@ import {
   LifeBuoy,
 } from "lucide-react";
 import { useAdminAuth } from "../../hooks/useAdminAuth";
-import { getSupportUnreadCount } from "../../api/supportApi";
+import { getSupportUnreadCount, notifySupportUnread } from "../../api/supportApi";
+import { connectRealtime } from "../../lib/realtime";
+import { getAdminAccessToken } from "../../utils/tokenStorage";
 import { cn } from "../../lib/utils";
 
 const navItems = [
@@ -44,7 +46,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     void loadCount();
     const timer = window.setInterval(() => {
       void loadCount();
-    }, 20000);
+    }, 60000);
 
     const onUnread = (event: Event) => {
       const unread = Number((event as CustomEvent<number>).detail);
@@ -54,9 +56,28 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     };
 
     window.addEventListener("carbn-support-unread", onUnread);
+
+    const token = getAdminAccessToken();
+    const disconnect = token
+      ? connectRealtime({
+          role: "admin",
+          token,
+          onEvent: (event, payload) => {
+            if (typeof payload.unread === "number") {
+              setUnreadSupport(payload.unread);
+              notifySupportUnread(payload.unread);
+            }
+            window.dispatchEvent(
+              new CustomEvent("carbn-support-event", { detail: { event, payload } })
+            );
+          },
+        })
+      : undefined;
+
     return () => {
       window.clearInterval(timer);
       window.removeEventListener("carbn-support-unread", onUnread);
+      disconnect?.();
     };
   }, []);
 

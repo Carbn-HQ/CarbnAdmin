@@ -32,14 +32,34 @@ export default function SupportPage() {
     }
   }, []);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
-
   const replaceRequest = (next: AdminSupportRequest) => {
-    setRequests((current) => current.map((item) => (item.id === next.id ? next : item)));
+    setRequests((current) => {
+      const exists = current.some((item) => item.id === next.id);
+      return exists
+        ? current.map((item) => (item.id === next.id ? next : item))
+        : [next, ...current];
+    });
     setSelected((current) => (current?.id === next.id ? next : current));
   };
+
+  useEffect(() => {
+    void load();
+
+    const onRealtime = (event: Event) => {
+      const detail = (event as CustomEvent<{ event?: string; payload?: Record<string, unknown> }>)
+        .detail;
+      const next = detail?.payload?.request as AdminSupportRequest | undefined;
+      if (!next?.id) {
+        return;
+      }
+      if (detail?.event === "support:new" || detail?.event === "support:updated") {
+        replaceRequest(next);
+      }
+    };
+
+    window.addEventListener("carbn-support-event", onRealtime);
+    return () => window.removeEventListener("carbn-support-event", onRealtime);
+  }, [load]);
 
   const openEnquiry = async (enquiry: AdminSupportRequest) => {
     setSelected(enquiry);
