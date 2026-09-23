@@ -6,6 +6,25 @@ export interface ApplicationAnswer {
   value: string | number | null;
 }
 
+export const APPLICATION_FORM_FIELDS: { id: string; label: string }[] = [
+  { id: "full_name", label: "Full name" },
+  { id: "age", label: "Age" },
+  { id: "location", label: "City / country" },
+  { id: "occupation", label: "Occupation" },
+  { id: "primary_focus", label: "Primary focus" },
+  { id: "help_needed", label: "What do you want help with?" },
+  { id: "current_training", label: "How are you training and recovering now?" },
+  { id: "why_carbn", label: "Why do you want to join the Founding Fifty?" },
+  { id: "time_commitment", label: "Time you can give each week" },
+  { id: "referral_source", label: "How did you hear about CARBN?" },
+];
+
+export const LONG_APPLICATION_FIELDS = [
+  "help_needed",
+  "current_training",
+  "why_carbn",
+];
+
 export interface BetaApplication {
   id: string;
   email: string;

@@ -19,6 +19,64 @@ import { useBetaApplication } from "../hooks/useBetaApplication";
 import { resendBetaInvitation } from "../api/betaApplicationsApi";
 import { getApiErrorMessage } from "../utils/apiError";
 import { formatDate } from "../utils/formatDate";
+import {
+  APPLICATION_FORM_FIELDS,
+  LONG_APPLICATION_FIELDS,
+  type ApplicationAnswer,
+} from "../types/application";
+
+const displayValue = (value: string | number | null | undefined) => {
+  if (value === null || value === undefined || String(value).trim() === "") {
+    return "–";
+  }
+  return String(value);
+};
+
+const buildApplicationAnswers = (application: {
+  email: string;
+  first_name: string | null;
+  last_name: string | null;
+  application_answers?: ApplicationAnswer[];
+  application_details?: Record<string, string | number | null>;
+}): ApplicationAnswer[] => {
+  const details = application.application_details || {};
+  const fromApi = application.application_answers || [];
+  const byId = new Map(fromApi.map((item) => [item.id, item]));
+
+  const known = APPLICATION_FORM_FIELDS.map((field) => {
+    const existing = byId.get(field.id);
+    const fallback =
+      field.id === "full_name"
+        ? `${application.first_name ?? ""} ${application.last_name ?? ""}`.trim()
+        : details[field.id];
+    return {
+      id: field.id,
+      label: existing?.label || field.label,
+      value: existing?.value ?? fallback ?? null,
+    };
+  });
+
+  const extras = [
+    ...fromApi.filter((item) => !APPLICATION_FORM_FIELDS.some((field) => field.id === item.id)),
+    ...Object.entries(details)
+      .filter(
+        ([key]) =>
+          !APPLICATION_FORM_FIELDS.some((field) => field.id === key) &&
+          !fromApi.some((item) => item.id === key)
+      )
+      .map(([id, value]) => ({
+        id,
+        label: id.replace(/[_-]+/g, " ").replace(/\b\w/g, (char) => char.toUpperCase()),
+        value,
+      })),
+  ];
+
+  return [
+    { id: "email", label: "Email", value: application.email },
+    ...known,
+    ...extras,
+  ];
+};
 
 export default function ApplicationDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -51,9 +109,9 @@ export default function ApplicationDetailsPage() {
   const applicantName = application
     ? `${application.first_name ?? ""} ${application.last_name ?? ""}`.trim() || application.email
     : "Applicant";
-  const applicationAnswers = application?.application_answers || [];
+  const applicationAnswers = application ? buildApplicationAnswers(application) : [];
   const hasApplicationAnswers = applicationAnswers.some(
-    (item) => item.value !== null && item.value !== undefined && String(item.value).trim() !== ""
+    (item) => item.id !== "email" && item.value !== null && item.value !== undefined && String(item.value).trim() !== ""
   );
 
   if (isLoading) {
@@ -182,27 +240,19 @@ export default function ApplicationDetailsPage() {
                 ? "Answers received"
                 : "The applicant has not completed the application form yet."}
           </p>
-          {hasApplicationAnswers ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {applicationAnswers.map((item) => (
-                <div
-                  key={item.id}
-                  className={
-                    ["help_needed", "current_training", "why_carbn"].includes(item.id)
-                      ? "sm:col-span-2"
-                      : ""
-                  }
-                >
-                  <p className="text-xs text-[hsl(var(--muted-foreground))] mb-0.5">{item.label}</p>
-                  <p className="text-sm text-[hsl(var(--foreground))] whitespace-pre-wrap">
-                    {item.value === null || item.value === undefined || String(item.value).trim() === ""
-                      ? "–"
-                      : String(item.value)}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ) : null}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {applicationAnswers.map((item) => (
+              <div
+                key={item.id}
+                className={LONG_APPLICATION_FIELDS.includes(item.id) ? "sm:col-span-2" : ""}
+              >
+                <p className="text-xs text-[hsl(var(--muted-foreground))] mb-0.5">{item.label}</p>
+                <p className="text-sm text-[hsl(var(--foreground))] whitespace-pre-wrap">
+                  {displayValue(item.value)}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
