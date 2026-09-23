@@ -11,12 +11,18 @@ import {
 import { getApiErrorMessage } from "../utils/apiError";
 import { formatDate } from "../utils/formatDate";
 
+type ReplyFilter = "all" | "unreplied" | "replied";
+
+const isReplied = (request: AdminSupportRequest) =>
+  request.status === "replied" || Boolean(request.replies?.length);
+
 export default function SupportPage() {
   const [requests, setRequests] = useState<AdminSupportRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<AdminSupportRequest | null>(null);
   const [replying, setReplying] = useState<AdminSupportRequest | null>(null);
+  const [filter, setFilter] = useState<ReplyFilter>("all");
 
   const load = useCallback(async () => {
     setIsLoading(true);
@@ -80,6 +86,23 @@ export default function SupportPage() {
     setReplying(enquiry);
   };
 
+  const repliedCount = requests.filter(isReplied).length;
+  const unrepliedCount = requests.length - repliedCount;
+  const visibleRequests = requests.filter((enquiry) => {
+    if (filter === "replied") {
+      return isReplied(enquiry);
+    }
+    if (filter === "unreplied") {
+      return !isReplied(enquiry);
+    }
+    return true;
+  });
+  const filters: { id: ReplyFilter; label: string; count: number }[] = [
+    { id: "all", label: "All", count: requests.length },
+    { id: "unreplied", label: "Unreplied", count: unrepliedCount },
+    { id: "replied", label: "Replied", count: repliedCount },
+  ];
+
   return (
     <AdminLayout>
       <div className="px-4 lg:px-8 py-6 space-y-6 max-w-7xl mx-auto">
@@ -100,6 +123,34 @@ export default function SupportPage() {
           </button>
         </div>
 
+        <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 py-3">
+            <p className="text-xs uppercase tracking-wider text-[hsl(var(--muted-foreground))]">Unreplied</p>
+            <p className="mt-1 text-2xl font-semibold text-[hsl(var(--foreground))]">{unrepliedCount}</p>
+          </div>
+          <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 py-3">
+            <p className="text-xs uppercase tracking-wider text-[hsl(var(--muted-foreground))]">Replied</p>
+            <p className="mt-1 text-2xl font-semibold text-[hsl(var(--foreground))]">{repliedCount}</p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {filters.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setFilter(item.id)}
+              className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${
+                filter === item.id
+                  ? "bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] border-transparent"
+                  : "border-[hsl(var(--border))] text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]"
+              }`}
+            >
+              {item.label} {item.count}
+            </button>
+          ))}
+        </div>
+
         <div className="bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-xl overflow-hidden">
           {error ? (
             <p className="px-6 py-8 text-sm text-[hsl(var(--status-declined))]">{error}</p>
@@ -108,6 +159,10 @@ export default function SupportPage() {
           ) : requests.length === 0 ? (
             <p className="px-6 py-8 text-sm text-[hsl(var(--muted-foreground))]">
               No support enquiries yet.
+            </p>
+          ) : visibleRequests.length === 0 ? (
+            <p className="px-6 py-8 text-sm text-[hsl(var(--muted-foreground))]">
+              {filter === "replied" ? "No replied enquiries." : "No unreplied enquiries."}
             </p>
           ) : (
             <div className="overflow-x-auto">
@@ -122,7 +177,7 @@ export default function SupportPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {requests.map((enquiry) => (
+                  {visibleRequests.map((enquiry) => (
                     <tr
                       key={enquiry.id}
                       onClick={() => void openEnquiry(enquiry)}
@@ -160,7 +215,7 @@ export default function SupportPage() {
                           }}
                           className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] hover:opacity-90"
                         >
-                          Reply
+                          {isReplied(enquiry) ? "Reply again" : "Reply"}
                         </button>
                       </td>
                     </tr>
@@ -190,7 +245,7 @@ export default function SupportPage() {
                 onClick={() => void openReply(selected)}
                 className="px-3 py-2 text-sm font-medium rounded-lg bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]"
               >
-                Reply
+                {isReplied(selected) ? "Reply again" : "Reply"}
               </button>
             </div>
             <p className="whitespace-pre-wrap text-sm text-[hsl(var(--foreground))]">{selected.message}</p>

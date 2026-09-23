@@ -150,7 +150,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   <Icon className="w-4 h-4 flex-shrink-0" />
                   <span className="flex-1">{label}</span>
                   {label === "Support" && unreadSupport > 0 ? (
-                    <span className="min-w-5 h-5 px-1.5 rounded-full bg-white/20 text-[10px] font-bold flex items-center justify-center">
+                    <span
+                      className={cn(
+                        "min-w-5 h-5 px-1.5 rounded-full text-[10px] font-bold flex items-center justify-center",
+                        isActive
+                          ? "bg-white text-[hsl(var(--sidebar-primary))]"
+                          : "bg-rose-500 text-white"
+                      )}
+                    >
                       {unreadSupport}
                     </span>
                   ) : null}

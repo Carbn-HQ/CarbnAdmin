@@ -2,6 +2,7 @@ import { useState } from "react";
 import { X, AlertTriangle, CheckCircle } from "lucide-react";
 import { replyAdminSupportRequest, type AdminSupportRequest } from "../../api/supportApi";
 import { getApiErrorMessage } from "../../utils/apiError";
+import { formatDate } from "../../utils/formatDate";
 
 interface ReplySupportModalProps {
   enquiry: AdminSupportRequest;
@@ -18,6 +19,8 @@ export default function ReplySupportModal({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const previousReplies = enquiry.replies || [];
+  const alreadyReplied = enquiry.status === "replied" || previousReplies.length > 0;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +50,9 @@ export default function ReplySupportModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="bg-[hsl(var(--card))] rounded-xl shadow-2xl w-full max-w-lg border border-[hsl(var(--border))]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-[hsl(var(--border))]">
-          <h2 className="text-base font-semibold text-[hsl(var(--foreground))]">Reply to enquiry</h2>
+          <h2 className="text-base font-semibold text-[hsl(var(--foreground))]">
+            {alreadyReplied ? "Reply again" : "Reply to enquiry"}
+          </h2>
           <button onClick={onClose} className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]">
             <X className="w-5 h-5" />
           </button>
@@ -64,16 +69,36 @@ export default function ReplySupportModal({
             <p className="mt-2 text-[hsl(var(--foreground))] whitespace-pre-wrap">{enquiry.message}</p>
           </div>
 
+          {previousReplies.length ? (
+            <div className="space-y-2 max-h-40 overflow-y-auto">
+              <p className="text-xs font-medium text-[hsl(var(--muted-foreground))]">Previous replies</p>
+              {previousReplies.map((reply) => (
+                <div key={reply.id} className="rounded-lg bg-[hsl(var(--muted))] px-3 py-2">
+                  <p className="text-[10px] text-[hsl(var(--muted-foreground))]">
+                    {reply.sender === "admin" ? "CARBN team" : "Member"} · {formatDate(reply.created_at)}
+                  </p>
+                  <p className="mt-1 whitespace-pre-wrap text-sm text-[hsl(var(--foreground))]">
+                    {reply.message}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : null}
+
           <div>
             <label className="block text-xs font-medium text-[hsl(var(--foreground))] mb-1.5">
-              Your reply
+              {alreadyReplied ? "Another reply" : "Your reply"}
             </label>
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={5}
               required
-              placeholder="Write a reply. This is emailed to the member and shown in their dashboard."
+              placeholder={
+                alreadyReplied
+                  ? "Add another reply. This is emailed to the member and shown in their dashboard."
+                  : "Write a reply. This is emailed to the member and shown in their dashboard."
+              }
               className="w-full px-3 py-2 text-sm border border-[hsl(var(--border))] rounded-lg bg-[hsl(var(--background))] text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--muted-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] resize-none"
             />
           </div>
@@ -106,7 +131,7 @@ export default function ReplySupportModal({
               disabled={isLoading || !!successMsg}
               className="flex-1 px-4 py-2 text-sm font-medium bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
             >
-              {isLoading ? "Sending…" : "Send reply"}
+              {isLoading ? "Sending…" : alreadyReplied ? "Send another reply" : "Send reply"}
             </button>
           </div>
         </form>
