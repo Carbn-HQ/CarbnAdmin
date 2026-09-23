@@ -1,5 +1,11 @@
 export type ApplicantStatus = "pending" | "approved" | "declined" | "active";
 
+export interface ApplicationAnswer {
+  id: string;
+  label: string;
+  value: string | number | null;
+}
+
 export interface BetaApplication {
   id: string;
   email: string;
@@ -16,6 +22,9 @@ export interface BetaApplication {
   auth_user_id: string | null;
   created_at: string;
   updated_at: string;
+  application_details?: Record<string, string | number | null>;
+  application_submitted_at?: string | null;
+  application_answers?: ApplicationAnswer[];
 }
 
 export interface ApplicationFilters {

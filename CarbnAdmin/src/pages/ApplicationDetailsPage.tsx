@@ -51,6 +51,10 @@ export default function ApplicationDetailsPage() {
   const applicantName = application
     ? `${application.first_name ?? ""} ${application.last_name ?? ""}`.trim() || application.email
     : "Applicant";
+  const applicationAnswers = application?.application_answers || [];
+  const hasApplicationAnswers = applicationAnswers.some(
+    (item) => item.value !== null && item.value !== undefined && String(item.value).trim() !== ""
+  );
 
   if (isLoading) {
     return (
@@ -166,11 +170,46 @@ export default function ApplicationDetailsPage() {
           )}
         </div>
 
+        <div className="bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-xl p-6">
+          <h2 className="text-sm font-semibold text-[hsl(var(--foreground))] mb-1 flex items-center gap-2">
+            <FileText className="w-4 h-4 text-[hsl(var(--muted-foreground))]" />
+            Founding Fifty application
+          </h2>
+          <p className="text-xs text-[hsl(var(--muted-foreground))] mb-4">
+            {application.application_submitted_at
+              ? `Submitted ${formatDate(application.application_submitted_at)}`
+              : hasApplicationAnswers
+                ? "Answers received"
+                : "The applicant has not completed the application form yet."}
+          </p>
+          {hasApplicationAnswers ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {applicationAnswers.map((item) => (
+                <div
+                  key={item.id}
+                  className={
+                    ["help_needed", "current_training", "why_carbn"].includes(item.id)
+                      ? "sm:col-span-2"
+                      : ""
+                  }
+                >
+                  <p className="text-xs text-[hsl(var(--muted-foreground))] mb-0.5">{item.label}</p>
+                  <p className="text-sm text-[hsl(var(--foreground))] whitespace-pre-wrap">
+                    {item.value === null || item.value === undefined || String(item.value).trim() === ""
+                      ? "–"
+                      : String(item.value)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-xl p-6">
             <h2 className="text-sm font-semibold text-[hsl(var(--foreground))] mb-4 flex items-center gap-2">
               <User className="w-4 h-4 text-[hsl(var(--muted-foreground))]" />
-              Application Details
+              Registration details
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[

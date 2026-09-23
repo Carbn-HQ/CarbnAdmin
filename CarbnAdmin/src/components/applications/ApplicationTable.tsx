@@ -13,6 +13,7 @@ interface ApplicationTableProps {
 const columns = [
   { key: "email", label: "Applicant" },
   { key: "status", label: "Status" },
+  { key: "form", label: "Application" },
   { key: "created_at", label: "Applied" },
 ];
 
@@ -94,6 +95,9 @@ export default function ApplicationTable({
                 </td>
                 <td className="px-4 py-3">
                   <ApplicationStatusBadge status={app.status} />
+                </td>
+                <td className="px-4 py-3 text-[hsl(var(--muted-foreground))] whitespace-nowrap text-xs">
+                  {app.application_submitted_at ? "Form submitted" : "Email only"}
                 </td>
                 <td className="px-4 py-3 text-[hsl(var(--muted-foreground))] whitespace-nowrap text-xs">
                   {formatDate(app.created_at)}
