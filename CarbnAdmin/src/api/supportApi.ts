@@ -53,6 +53,43 @@ export const replyAdminSupportRequest = async (id: string, message: string) => {
   return response.data;
 };
 
+export interface AdminEmailChangeRequest {
+  id: string;
+  user_id: string;
+  current_email: string;
+  new_email: string;
+  reason: string;
+  status: string;
+  status_label: string;
+  opened: boolean;
+  first_name: string | null;
+  last_name: string | null;
+  full_name: string | null;
+  created_at: string;
+  reviewed_at: string | null;
+}
+
+export const getAdminEmailChangeRequests = async () => {
+  const response = await apiClient.get<
+    ApiResponse<{ unread: number; pending: number; requests: AdminEmailChangeRequest[] }>
+  >("/admin/support/email-changes");
+  return response.data;
+};
+
+export const openAdminEmailChangeRequest = async (id: string) => {
+  const response = await apiClient.post<
+    ApiResponse<{ unread: number; request: AdminEmailChangeRequest }>
+  >(`/admin/support/email-changes/${id}/open`);
+  return response.data;
+};
+
+export const approveAdminEmailChangeRequest = async (id: string) => {
+  const response = await apiClient.post<
+    ApiResponse<{ unread: number; request: AdminEmailChangeRequest }>
+  >(`/admin/support/email-changes/${id}/approve`);
+  return response.data;
+};
+
 export const notifySupportUnread = (unread: number) => {
   window.dispatchEvent(new CustomEvent("carbn-support-unread", { detail: unread }));
 };
