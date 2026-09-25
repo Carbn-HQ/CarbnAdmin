@@ -25,7 +25,10 @@ import {
   type ApplicationAnswer,
 } from "../types/application";
 
-const displayValue = (value: string | number | null | undefined) => {
+const displayValue = (value: string | number | string[] | null | undefined) => {
+  if (Array.isArray(value)) {
+    return value.length ? value.join(", ") : "–";
+  }
   if (value === null || value === undefined || String(value).trim() === "") {
     return "–";
   }
@@ -37,7 +40,7 @@ const buildApplicationAnswers = (application: {
   first_name: string | null;
   last_name: string | null;
   application_answers?: ApplicationAnswer[];
-  application_details?: Record<string, string | number | null>;
+  application_details?: Record<string, string | number | string[] | null>;
 }): ApplicationAnswer[] => {
   const details = application.application_details || {};
   const fromApi = application.application_answers || [];
